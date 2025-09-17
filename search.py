@@ -1,0 +1,1 @@
+# Python search helper (from my answer)
