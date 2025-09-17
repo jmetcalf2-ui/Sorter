@@ -1,4 +1,3 @@
-# search.py
 import os
 import httpx
 
@@ -37,13 +36,7 @@ async def serp_search(q: str, api_key: str | None = None):
         return []
 
     url = "https://serper.dev/api/search"
-    payload = {
-        "q": q,
-        "num": 10,
-        "gl": "us",
-        "hl": "en",
-        "autocorrect": True,
-    }
+    payload = {"q": q, "num": 10, "gl": "us", "hl": "en", "autocorrect": True}
 
     try:
         async with httpx.AsyncClient(timeout=15) as client:
@@ -54,17 +47,14 @@ async def serp_search(q: str, api_key: str | None = None):
             r.raise_for_status()
             j = r.json()
             organic = j.get("organic") or []
-            out = []
-            for o in organic:
-                link = o.get("link") or o.get("url") or ""
-                if not link:
-                    continue
-                out.append({
-                    "title": o.get("title", "") or "",
-                    "link": link,
-                    "snippet": o.get("snippet") or o.get("snippet_highlighted") or o.get("description") or ""
-                })
-            return out
+            return [
+                {
+                    "title": o.get("title", ""),
+                    "link": o.get("link") or o.get("url") or "",
+                    "snippet": o.get("snippet") or o.get("description") or ""
+                }
+                for o in organic if o.get("link") or o.get("url")
+            ]
     except Exception as e:
         print("Serper error:", e)
         return []
