@@ -1,6 +1,4 @@
-# utils.py
-import re, urllib.parse
-from tldts import get_domain
+import re, urllib.parse, tldextract
 from selectolax.parser import HTMLParser
 
 HARD_EXCLUDES = ["https://www.artadvisors.org/art-advisor-directory"]
@@ -40,7 +38,8 @@ def is_hard_excluded(url: str) -> bool:
 
 def classify(url: str, title: str = "", site_name: str = "") -> str | None:
     host = urllib.parse.urlsplit(url).hostname or ""
-    d = get_domain(host) or host
+    ext = tldextract.extract(host)
+    d = f"{ext.domain}.{ext.suffix}" if ext.domain and ext.suffix else host
     path = url.lower()
     if re.search(r"museum|gallery|foundation|university|collection", d) and re.search(r"exhibition|project|artist|profile", path):
         return "project"
